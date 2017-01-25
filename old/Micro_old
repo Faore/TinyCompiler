@@ -1,0 +1,23 @@
+echo ""
+echo "Starting Micro"
+
+echo ""
+echo "    Adding ANTLR to CLASSPATH..."
+export CLASSPATH=".:antlr-4.6-complete.jar:$CLASSPATH"
+
+echo ""
+echo "    Generating Grammer..."
+# java -cp antlr-4.6-complete.jar org.antlr.Tool Little.g
+java -jar antlr-4.6-complete.jar Little.g4
+
+echo ""
+echo "    Compiling Program..."
+javac Little*.java
+
+echo ""
+echo "    Running Program..."
+java LittleCompiler
+
+echo ""
+echo "Done."
+echo ""
