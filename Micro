@@ -1,0 +1,18 @@
+echo ""
+echo "Starting Micro"
+
+echo ""
+echo "    Generating Grammer..."
+java -cp antlr-4.6-complete.jar org.antlr.v4.Tool LITTLE.g4
+
+echo ""
+echo "    Compiling Program..."
+javac -cp .:antlr-4.6-complete.jar LITTLE*.java
+
+echo ""
+echo "    Running Program..."
+java -cp .:antlr-4.6-complete.jar LITTLECompiler
+
+echo ""
+echo "Done."
+echo ""
