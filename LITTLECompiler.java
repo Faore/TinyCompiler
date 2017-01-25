@@ -5,7 +5,7 @@ public class LITTLECompiler {
 	public static void main(String[] args) {
 		System.out.println();
 		
-		ANTLRInputStream input = new ANTLRInputStream("hello test");
+		ANTLRInputStream input = new ANTLRInputStream("-- ab test");
 		LITTLELexer lexer = new LITTLELexer(input);
 		Vocabulary vocabulary = lexer.getVocabulary();
 
