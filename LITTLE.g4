@@ -1,9 +1,14 @@
-grammar LITTLE;
+grammar Little;
 
 tokens: .* EOF;
 
-T1 : 'ab';
+COMMENT: '--''.'* -> skip;
+STRINGLITERAL:["][^"]*["];
+INTLITERAL: [0-9]+;
+FLOATLITERAL:([0-9]+'.'[0-9]+)|'.'[0-9]+;
 
-COMMENT : '--' .* EOL ;
+KEYWORD:	'PROGRAM'|'BEGIN'|'ENDIF'|'ENDWHILE'|'END'|'FUNCTION'|'READ'|'WRITE'|'IF'|'ELSE'|'WHILE'|'CONTINUE'|'BREAK'|'RETURN'|'INT'|'VOID'|'STRING'|'FLOAT';
+OPERATOR:	':='|'!='|'<='|'>='|'+'|'-'|'*'|'='|'<'|'>'|'/'|','|'('|')'|';';
+IDENTIFIER: [A-z][A-z0-9]*;
 
-WS : [ \t\r\n]+ -> skip;
+WHITESPACE: [ \n\r\t] -> skip;
