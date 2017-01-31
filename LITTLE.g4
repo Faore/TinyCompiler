@@ -2,8 +2,8 @@ grammar LITTLE;
 
 tokens: .* EOF;
 
-COMMENT: '--''.'* -> skip;
-STRINGLITERAL:["]~["]*["];
+COMMENT: '--'~[\n]*'\n' -> skip;
+STRINGLITERAL:'"'~["]*'"';
 INTLITERAL: [0-9]+;
 FLOATLITERAL:([0-9]+'.'[0-9]+)|'.'[0-9]+;
 
