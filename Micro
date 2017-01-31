@@ -1,18 +1,44 @@
-echo ""
-echo "Starting Micro"
+# run as ./Micro input_file
 
-echo ""
-echo "    Generating Grammer..."
+# to make this executable use 'chmod +x Micro'
+
+# to print, or not to print
+#	1 prints, 0 does not
+VAR_PRINT=0
+
+if [ $VAR_PRINT -eq 1 ]
+then
+	echo ""
+	echo "Starting Micro"
+fi
+
+if [ $VAR_PRINT -eq 1 ]
+then
+	echo ""
+	echo "    Generating Grammer..."
+fi
+
 java -cp antlr-4.6-complete.jar org.antlr.v4.Tool LITTLE.g4
 
-echo ""
-echo "    Compiling Program..."
+if [ $VAR_PRINT -eq 1 ]
+then
+	echo ""
+	echo "    Compiling Program..."
+fi
+
 javac -cp .:antlr-4.6-complete.jar LITTLE*.java
 
-echo ""
-echo "    Running Program..."
-java -cp .:antlr-4.6-complete.jar LITTLECompiler
+if [ $VAR_PRINT -eq 1 ]
+then
+	echo ""
+	echo "    Running Program..."
+fi
 
-echo ""
-echo "Done."
-echo ""
+java -cp .:antlr-4.6-complete.jar LITTLECompiler $1
+
+if [ $VAR_PRINT -eq 1 ]
+then
+	echo ""
+	echo "Done."
+	echo ""
+fi
