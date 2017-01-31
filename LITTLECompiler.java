@@ -13,14 +13,17 @@ public class LITTLECompiler {
 			LITTLELexer lexer = new LITTLELexer(input);
 			Vocabulary vocabulary = lexer.getVocabulary();
 
-			Token token = null;
+			// get the first token
+			Token token = lexer.nextToken();
 			do {
-				token = lexer.nextToken();
 				// print out the token information
 				System.out.print("Token Type: ");
 				System.out.println(vocabulary.getSymbolicName(token.getType()));
 				System.out.print("Value: ");
 				System.out.println(token.getText());
+
+				// get the next token
+				token = lexer.nextToken();
 			} while (token.getType() != Token.EOF);
 		} else {
 			System.out.println("No Input Provided.");
