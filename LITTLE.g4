@@ -2,16 +2,16 @@ grammar LITTLE;
 
 tokens: .* EOF;
 
-COMMENT: '--'~[\n]*'\n' -> skip;
+COMMENT:       '--'~[\n]*'\n' -> skip;
 
-STRINGLITERAL:'"'~["]*'"';
-INTLITERAL: [0-9]+;
-FLOATLITERAL:([0-9]+'.'[0-9]+)|'.'[0-9]+;
+STRINGLITERAL: '"'~["]*'"';
+INTLITERAL:    [0-9]+;
+FLOATLITERAL:  ([0-9]+'.'[0-9]+)|'.'[0-9]+;
 
-KEYWORD:	'PROGRAM'|'BEGIN'|'ENDIF'|'ENDWHILE'|'END'|'FUNCTION'|'READ'|'WRITE'|'IF'|'ELSE'|'WHILE'|'CONTINUE'|'BREAK'|'RETURN'|'INT'|'VOID'|'STRING'|'FLOAT';
+KEYWORD:	   'PROGRAM'|'BEGIN'|'ENDIF'|'ENDWHILE'|'END'|'FUNCTION'|'READ'|'WRITE'|'IF'|'ELSE'|'WHILE'|'CONTINUE'|'BREAK'|'RETURN'|'INT'|'VOID'|'STRING'|'FLOAT';
 
-OPERATOR:	':='|'!='|'<='|'>='|'+'|'-'|'*'|'='|'<'|'>'|'/'|','|'('|')'|';';
+OPERATOR:	   ':='|'!='|'<='|'>='|'+'|'-'|'*'|'='|'<'|'>'|'/'|','|'('|')'|';';
 
-IDENTIFIER: [A-z][A-z0-9]*;
+IDENTIFIER:    [A-z][A-z0-9]*;
 
-WHITESPACE: [ \n\r\t] -> skip;
+WHITESPACE:    [ \n\r\t] -> skip;
