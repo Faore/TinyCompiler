@@ -1,6 +1,6 @@
 # run as ./Micro input_file
 
-# to make this executable use 'chmod +x Micro'
+# to make this executable use 'chmod u+x Micro'
 
 # to print, or not to print
 #	1 prints, 0 does not
