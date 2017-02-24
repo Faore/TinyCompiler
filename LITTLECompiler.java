@@ -18,8 +18,15 @@ public class LITTLECompiler {
 			
 			if (inputStream != null) {
 				LITTLELexer lexer = new LITTLELexer(inputStream);
+
+				CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+				
+				LITTLEParser parser = new LITTLEParser(tokenStream);
+				
+				//parser.eval();
+
 				// get the vocabulary
-				Vocabulary vocabulary = lexer.getVocabulary();
+				/*Vocabulary vocabulary = lexer.getVocabulary();
 
 				// get the first token
 				Token token = lexer.nextToken();
@@ -32,7 +39,7 @@ public class LITTLECompiler {
 
 					// get the next token
 					token = lexer.nextToken();
-				} while (token.getType() != Token.EOF);
+				} while (token.getType() != Token.EOF);*/
 			}
 		} else {
 			System.out.println("No Input File Provided.");
