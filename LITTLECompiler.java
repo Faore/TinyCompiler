@@ -1,9 +1,12 @@
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.*;
 import java.io.*;
 
 public class LITTLECompiler {
+	protected static int errors_syntax = 0;
+
 	public static void main(String[] args) throws Exception {
 		if (args.length > 0) {
 			// Read the entire file supplied into the input stream.
@@ -17,14 +20,14 @@ public class LITTLECompiler {
 			}
 			
 			if (inputStream != null) {
+				LITTLEErrorListener errorListener = new LITTLEErrorListener();
+
 				LITTLELexer lexer = new LITTLELexer(inputStream);
 
-				CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-				
-				LITTLEParser parser = new LITTLEParser(tokenStream);
-				
-				//parser.eval();
+				//lexer.removeErrorListeners();
+				//lexer.addErrorListener(errorListener);
 
+				// Step 1				
 				// get the vocabulary
 				/*Vocabulary vocabulary = lexer.getVocabulary();
 
@@ -40,6 +43,32 @@ public class LITTLECompiler {
 					// get the next token
 					token = lexer.nextToken();
 				} while (token.getType() != Token.EOF);*/
+
+
+				// Step 2
+
+				CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+
+				LITTLEParser parser = new LITTLEParser(tokenStream);
+
+				parser.removeErrorListeners();
+				parser.addErrorListener(errorListener);
+
+				errors_syntax = 0;
+				
+				try {
+					ParserRuleContext ctx = parser.program();
+					//ParseTree parseTree = parser.program();
+					//System.out.println(parser.getNumberOfSyntaxErrors());
+					//System.out.println(parseTree.toStringTree(parser));
+					if (errors_syntax == 0) {
+						System.out.println("Accepted");
+					} else {
+						System.out.println("Not accepted");	
+					}
+				} catch (RecognitionException e) {
+					System.out.println("Not accepted");
+				}
 			}
 		} else {
 			System.out.println("No Input File Provided.");
