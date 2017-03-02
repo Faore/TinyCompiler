@@ -18,6 +18,7 @@ public class LITTLEErrorListener implements ANTLRErrorListener {
 	}
 
 	public void syntaxError(Recognizer<?,?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+		// indicate that there was a syntax error
 		LITTLECompiler.errors_syntax += 1;
 	}
 }

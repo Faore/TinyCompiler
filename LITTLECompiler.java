@@ -20,6 +20,7 @@ public class LITTLECompiler {
 			}
 			
 			if (inputStream != null) {
+				// create a custom error listener
 				LITTLEErrorListener errorListener = new LITTLEErrorListener();
 
 				LITTLELexer lexer = new LITTLELexer(inputStream);
@@ -49,18 +50,24 @@ public class LITTLECompiler {
 
 				CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 
+				// instantiate the parser with the token stream
 				LITTLEParser parser = new LITTLEParser(tokenStream);
 
+				// update the parser's error listener
 				parser.removeErrorListeners();
 				parser.addErrorListener(errorListener);
 
+				// clear errors
 				errors_syntax = 0;
 				
 				try {
+					// parse the program
 					ParserRuleContext ctx = parser.program();
 					//ParseTree parseTree = parser.program();
 					//System.out.println(parser.getNumberOfSyntaxErrors());
 					//System.out.println(parseTree.toStringTree(parser));
+					
+					// print out the proper message
 					if (errors_syntax == 0) {
 						System.out.println("Accepted");
 					} else {
