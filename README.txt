@@ -2,7 +2,7 @@ CSCI468 Code
 
 Kyle Johnson (kyle@fredriksapps.com)
 Chris Thomas (TODO)
-Mathew Gostnell (TODO)
+Mathew Gostnell (mathew.gostnell@gmail.com)
 
 Micro:
 	- Script may need to be changed to executable 'chmod u+x Micro'
