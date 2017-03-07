@@ -1,5 +1,6 @@
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.util.*;
 import java.io.*;
@@ -68,14 +69,23 @@ public class LITTLECompiler {
 					//System.out.println(parseTree.toStringTree(parser));
 					
 					// print out the proper message
-					if (errors_syntax == 0) {
+					/*if (errors_syntax == 0) {
 						System.out.println("Accepted");
 					} else {
 						System.out.println("Not accepted");	
+					}*/
+					if (errors_syntax > 0) {
+						System.out.println("Syntax Error");
 					}
 				} catch (RecognitionException e) {
 					System.out.println("Not accepted");
 				}
+
+				LITTLEScopeListener scopeListener = new LITTLEScopeListener();
+
+				new ParseTreeWalker().walk(scopeListener, parser.program());
+
+
 			}
 		} else {
 			System.out.println("No Input File Provided.");
