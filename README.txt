@@ -8,19 +8,20 @@ Micro:
 	- Script may need to be changed to executable 'chmod u+x Micro'
 	- Usage './Micro input_file'
 
-GradeLab2.sh:
-	- May need to be changed to executable 'chmod u+x GradeLab2.sh'
+GradeLab3.sh:
+	- May need to be changed to executable 'chmod u+x GradeLab3.sh'
 	- File structure must be as follows:
 		.
 		├── antlr-4.6-complete.jar
-		├── GradeLab2.sh
+		├── GradeLab3.sh
 		├── LITTLECompiler.java
-                ├── LITTLEErrorListener.java
+		├── LITTLEErrorListener.java
+		├── LITTLEScopeListener.java
 		├── LITTLE.g4
 		├── Micro
-		└── Step2
+		└── Step3
 			├── inputs
 			│   ├── <something>.micro
 			└── outputs
 				└── <something>.out
-	- Usage './GradeLab2.sh'
+	- Usage './GradeLab3.sh'
