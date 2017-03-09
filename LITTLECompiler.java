@@ -46,9 +46,6 @@ public class LITTLECompiler {
 					token = lexer.nextToken();
 				} while (token.getType() != Token.EOF);*/
 
-
-				// Step 2
-
 				CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 
 				// instantiate the parser with the token stream
@@ -60,14 +57,15 @@ public class LITTLECompiler {
 
 				// clear errors
 				errors_syntax = 0;
+
+				ParseTree tree;
 				
 				try {
 					// parse the program
-					ParserRuleContext ctx = parser.program();
-					//ParseTree parseTree = parser.program();
-					//System.out.println(parser.getNumberOfSyntaxErrors());
-					//System.out.println(parseTree.toStringTree(parser));
-					
+					tree = parser.program();
+					//System.out.println(tree.toStringTree(parser));
+
+					// Step 2
 					// print out the proper message
 					/*if (errors_syntax == 0) {
 						System.out.println("Accepted");
@@ -75,16 +73,20 @@ public class LITTLECompiler {
 						System.out.println("Not accepted");	
 					}*/
 					if (errors_syntax > 0) {
+						tree = null;
 						System.out.println("Syntax Error");
 					}
 				} catch (RecognitionException e) {
+					tree = null;
 					System.out.println("Not accepted");
 				}
 
-				LITTLEScopeListener scopeListener = new LITTLEScopeListener();
+				if (tree != null) {
+					LITTLEScopeListener scopeListener = new LITTLEScopeListener();
+					new ParseTreeWalker().walk(scopeListener, tree);
 
-				new ParseTreeWalker().walk(scopeListener, parser.program());
-
+					scopeListener.print_symbol_tables();
+				}
 
 			}
 		} else {

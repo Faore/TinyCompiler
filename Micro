@@ -6,29 +6,35 @@
 #	1 prints, 0 does not
 VAR_PRINT=0
 
+# to compile, or not to compile
+#	1 compiles, 0 does not
+VAR_COMPILE=1
+
 if [ $VAR_PRINT -eq 1 ]
 then
 	echo ""
 	echo "Starting Micro"
 fi
 
-if [ $VAR_PRINT -eq 1 ]
+if [ $VAR_COMPILE -eq 1 ]
 then
-	echo ""
-	echo "    Generating Grammer..."
+	if [ $VAR_PRINT -eq 1 ]
+	then
+		echo ""
+		echo "    Generating Grammer..."
+	fi
+	# generate the grammer
+	java -cp antlr-4.6-complete.jar org.antlr.v4.Tool LITTLE.g4
+
+	if [ $VAR_PRINT -eq 1 ]
+	then
+		echo ""
+		echo "    Compiling Program..."
+	fi
+
+	# compile all .java files that start with LITTLE
+	javac -cp .:antlr-4.6-complete.jar LITTLE*.java
 fi
-
-# generate the grammer
-java -cp antlr-4.6-complete.jar org.antlr.v4.Tool LITTLE.g4
-
-if [ $VAR_PRINT -eq 1 ]
-then
-	echo ""
-	echo "    Compiling Program..."
-fi
-
-# compile all .java files that start with LITTLE
-javac -cp .:antlr-4.6-complete.jar LITTLE*.java
 
 if [ $VAR_PRINT -eq 1 ]
 then
