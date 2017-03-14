@@ -7,7 +7,7 @@
       <Entity type="Class">
         <Name>LITTLEScopeListener</Name>
         <Access>Public</Access>
-        <Location left="1027" top="695" />
+        <Location left="707" top="695" />
         <Size width="385" height="519" />
         <Collapsed>False</Collapsed>
         <Member type="Field">private Stack&lt;String&gt; scopes</Member>
@@ -41,7 +41,7 @@
       <Entity type="Class">
         <Name>LITTLEBaseListener</Name>
         <Access>Public</Access>
-        <Location left="1027" top="70" />
+        <Location left="707" top="215" />
         <Size width="385" height="402" />
         <Collapsed>False</Collapsed>
         <Member type="Method">public void enterProgram(LITTLEParser.ProgramContext ctx)</Member>
@@ -65,7 +65,7 @@
       <Entity type="Class">
         <Name>LITTLECompiler</Name>
         <Access>Public</Access>
-        <Location left="441" top="695" />
+        <Location left="375" top="451" />
         <Size width="162" height="216" />
         <Collapsed>False</Collapsed>
         <Member type="Method">public void main(String[] args)</Member>
@@ -74,7 +74,7 @@
       <Entity type="Class">
         <Name>ParseTreeWalker</Name>
         <Access>Public</Access>
-        <Location left="369" top="1011" />
+        <Location left="301" top="919" />
         <Size width="307" height="94" />
         <Collapsed>False</Collapsed>
         <Member type="Method">public void walk(LITTLEScopeListener scopeListener, bool b)</Member>
@@ -87,14 +87,10 @@
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
       <Relationship type="Dependency" first="2" second="0">
-        <Label>
-        </Label>
         <StartOrientation>Horizontal</StartOrientation>
         <EndOrientation>Horizontal</EndOrientation>
       </Relationship>
       <Relationship type="Dependency" first="2" second="3">
-        <Label>
-        </Label>
         <StartOrientation>Vertical</StartOrientation>
         <EndOrientation>Vertical</EndOrientation>
       </Relationship>
