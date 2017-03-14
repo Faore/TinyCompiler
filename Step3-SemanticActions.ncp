@@ -3,7 +3,38 @@
   <ProjectItem type="NClass.DiagramEditor.ClassDiagram.Diagram" assembly="NClass.DiagramEditor, Version=2.4.1823.0, Culture=neutral, PublicKeyToken=null">
     <Name>Step3-Diagram</Name>
     <Language>Java</Language>
-    <Entities />
-    <Relationships />
+    <Entities>
+      <Entity type="Class">
+        <Name>LITTLEScopeListener</Name>
+        <Access>Public</Access>
+        <Location left="1048" top="354" />
+        <Size width="385" height="303" />
+        <Collapsed>False</Collapsed>
+        <Member type="Field">private Stack&lt;String&gt; scopes</Member>
+        <Member type="Field">private LinkedHashMap&lt;String, LinkedHashMap&lt;String, String&gt;&gt; symbol_table</Member>
+        <Member type="Field">private LinkedHashMap&lt;String, String&gt; current_symbol_table</Member>
+        <Member type="Field">private int block</Member>
+        <Member type="Field">private boolean did_error</Member>
+        <Member type="Field">private ArrayList&lt;String&gt; error_messages</Member>
+        <Member type="Constructor">public LITTLEScopeListener()</Member>
+        <Member type="Method">public void increment_scope(String name)</Member>
+        <Member type="Method">public void decrement_scope()</Member>
+        <Modifier>None</Modifier>
+      </Entity>
+      <Entity type="Class">
+        <Name>LITTLEBaseListener</Name>
+        <Access>Public</Access>
+        <Location left="1048" top="23" />
+        <Size width="385" height="216" />
+        <Collapsed>False</Collapsed>
+        <Modifier>None</Modifier>
+      </Entity>
+    </Entities>
+    <Relationships>
+      <Relationship type="Generalization" first="0" second="1">
+        <StartOrientation>Vertical</StartOrientation>
+        <EndOrientation>Vertical</EndOrientation>
+      </Relationship>
+    </Relationships>
   </ProjectItem>
 </Project>
