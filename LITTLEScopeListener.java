@@ -90,14 +90,6 @@ public class LITTLEScopeListener extends LITTLEBaseListener {
 	//@Override
 	//public void exitVar_decl(LITTLEParser.Var_declContext ctx) { }
 
-	private void param_decl_list_recursive(ParseTree tree) {
-		// handle child 0
-		System.out.print(tree.getChild(0).getText());
-		if (tree.getChildCount() > 1) {
-			param_decl_list_recursive(tree.getChild(1));
-		}
-	}
-
 	private void add_param_decl_to_symbol_table(ParseTree tree) {
 		if (tree.getChildCount() > 1) {
 			String type = tree.getChild(0).getText();
