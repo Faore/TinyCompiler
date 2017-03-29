@@ -1,7 +1,7 @@
 CSCI468 Code
 
 Kyle Johnson (kyle@fredriksapps.com)
-Chris Thomas (TODO)
+Chris Thomas (chris@admt.im)
 Mathew Gostnell (mathew.gostnell@gmail.com)
 
 Micro:
