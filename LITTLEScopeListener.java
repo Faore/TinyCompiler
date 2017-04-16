@@ -5,7 +5,7 @@ import java.util.*;
 
 public class LITTLEScopeListener extends LITTLEBaseListener {
 	private Stack<String> scopes;
-	private LinkedHashMap<String, LinkedHashMap<String, String>> symbol_table;
+	public LinkedHashMap<String, LinkedHashMap<String, String>> symbol_table;
 	private LinkedHashMap<String, String> current_symbol_table;
 	
 	private int block;

@@ -6,6 +6,7 @@ import java.util.*;
 import java.io.*;
 
 public class LITTLECompiler {
+
 	protected static int errors_syntax = 0;
 
 	public static void main(String[] args) throws Exception {
@@ -85,11 +86,12 @@ public class LITTLECompiler {
 					LITTLEScopeListener scopeListener = new LITTLEScopeListener();
 					new ParseTreeWalker().walk(scopeListener, tree);
 					LITTLEIRCodeListener irCodeListener = new LITTLEIRCodeListener();
+					irCodeListener.symbol_table = scopeListener.symbol_table;
 					new ParseTreeWalker().walk(irCodeListener, tree);
 					//Print the Symbol Table
 					scopeListener.print_symbol_tables();
 					System.out.println("\n\nIR Code:");
-					//Print the IRCode
+					//Print the IROp
 					irCodeListener.printIRCode();
 				}
 

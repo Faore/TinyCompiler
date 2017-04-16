@@ -2,16 +2,23 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Stack;
 
 /**
  * Created by faore on 4/16/17.
  */
 public class LITTLEIRCodeListener extends LITTLEBaseListener {
+    //Symbol Table is useful.
+    LinkedHashMap<String, LinkedHashMap<String, String>> symbol_table;
 
-    //Store all the IRCode
+    //Store all the IROp
     LinkedList<IRNode> irCode = new LinkedList<IRNode>();
-    int currentTemp = 1;
+    int nextTemp = 1;
+
+    //Use to store IR Codes part of statements (expression parts)
+    Stack<LinkedList<IRNode>> temporaryCodes = new Stack<LinkedList<IRNode>>();
     
     @Override public void enterTokens(LITTLEParser.TokensContext ctx) { }
     
@@ -89,15 +96,20 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
     @Override public void enterFunc_decl(LITTLEParser.Func_declContext ctx) {
         //Label the function.
         irCode.add(
-                IRNode.ioAndJump(Opcode.LABEL, ctx.id().getText())
+                IRNode.ioAndJump(IROp.LABEL, ctx.id().getText())
         );
         //Link to move the frame pointer.
         irCode.add(
-                IRNode.comment("LINK")
+                IRNode.single(IROp.LINK)
         );
     }
     
-    @Override public void exitFunc_decl(LITTLEParser.Func_declContext ctx) { }
+    @Override public void exitFunc_decl(LITTLEParser.Func_declContext ctx) {
+        //Unlink/Return
+        irCode.add(
+                IRNode.single(IROp.RET)
+        );
+    }
     
     @Override public void enterFunc_body(LITTLEParser.Func_bodyContext ctx) { }
     
@@ -115,29 +127,99 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
     
     @Override public void exitBase_stmt(LITTLEParser.Base_stmtContext ctx) { }
     
-    @Override public void enterAssign_stmt(LITTLEParser.Assign_stmtContext ctx) { }
+    @Override public void enterAssign_stmt(LITTLEParser.Assign_stmtContext ctx) {}
     
     @Override public void exitAssign_stmt(LITTLEParser.Assign_stmtContext ctx) { }
     
     @Override public void enterAssign_expr(LITTLEParser.Assign_exprContext ctx) { }
     
-    @Override public void exitAssign_expr(LITTLEParser.Assign_exprContext ctx) { }
+    @Override public void exitAssign_expr(LITTLEParser.Assign_exprContext ctx) {
+        //Assign the result with the last temporary
+        String id = ctx.id().getText();
+
+        if(symbol_table.get("GLOBAL").get(id).equals("INT")) {
+            irCode.add(
+                    IRNode.store(IROp.STOREI, ("$T" + (nextTemp - 1)), id)
+            );
+        } else if(symbol_table.get("GLOBAL").get(id).equals("FLOAT")) {
+            irCode.add(
+                    IRNode.store(IROp.STOREF, ("$T" + (nextTemp - 1)), id)
+            );
+        }
+        else {
+            System.err.println("Failed to generate code for expression: " + ctx.getText());
+        }
+
+    }
     
     @Override public void enterRead_stmt(LITTLEParser.Read_stmtContext ctx) { }
     
     @Override public void exitRead_stmt(LITTLEParser.Read_stmtContext ctx) { }
     
-    @Override public void enterWrite_stmt(LITTLEParser.Write_stmtContext ctx) { }
+    @Override public void enterWrite_stmt(LITTLEParser.Write_stmtContext ctx) {
+        //Deal with the first item.
+        String firstId = ctx.id_list().id().getText();
+        if(symbol_table.get("GLOBAL").get(firstId).equals("INT")) {
+            //Write an integer
+            irCode.add(
+                    IRNode.ioAndJump(IROp.WRITEI, firstId)
+            );
+
+        }
+        if(symbol_table.get("GLOBAL").get(firstId).equals("FLOAT")) {
+            //Write a float
+            irCode.add(
+                    IRNode.ioAndJump(IROp.WRITEF, firstId)
+            );
+        }
+        if(symbol_table.get("GLOBAL").get(firstId).startsWith("STRING")) {
+            //Write a string
+            irCode.add(
+                    IRNode.ioAndJump(IROp.WRITES, firstId)
+            );
+        }
+        System.out.println("Parsed var: " + ctx.id_list().id().getText());
+        LITTLEParser.Id_tailContext currentContext = ctx.id_list().id_tail();
+        while(currentContext.id() != null) {
+            String id = currentContext.id().getText();
+            if(symbol_table.get("GLOBAL").get(id).equals("INT")) {
+                //Write an integer
+                irCode.add(
+                        IRNode.ioAndJump(IROp.WRITEI, id)
+                );
+            }
+            if(symbol_table.get("GLOBAL").get(id).equals("FLOAT")) {
+                //Write a float
+                irCode.add(
+                        IRNode.ioAndJump(IROp.WRITEF, id)
+                );
+
+            }
+            if(symbol_table.get("GLOBAL").get(id).startsWith("STRING")) {
+                //Write a string
+                irCode.add(
+                        IRNode.ioAndJump(IROp.WRITES, id)
+                );
+
+            } else {
+                System.err.println("Encountered unrecognized type to WRITE.");
+            }
+            //Change the context.
+            currentContext = currentContext.id_tail();
+        }
+    }
     
     @Override public void exitWrite_stmt(LITTLEParser.Write_stmtContext ctx) { }
     
     @Override public void enterReturn_stmt(LITTLEParser.Return_stmtContext ctx) { }
     
     @Override public void exitReturn_stmt(LITTLEParser.Return_stmtContext ctx) { }
-    
-    @Override public void enterExpr(LITTLEParser.ExprContext ctx) { }
-    
-    @Override public void exitExpr(LITTLEParser.ExprContext ctx) { }
+
+    @Override public void enterExpr(LITTLEParser.ExprContext ctx) {
+    }
+
+    @Override public void exitExpr(LITTLEParser.ExprContext ctx) {
+    }
     
     @Override public void enterExpr_prefix(LITTLEParser.Expr_prefixContext ctx) { }
     
