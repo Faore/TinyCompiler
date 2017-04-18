@@ -85,6 +85,9 @@ public class LITTLECompiler {
 				if (tree != null) {
 					LITTLEScopeListener scopeListener = new LITTLEScopeListener();
 					new ParseTreeWalker().walk(scopeListener, tree);
+					SymbolTable symbol_table = scopeListener.get_symbol_table();
+					symbol_table.printout();
+
 					LITTLEIRCodeListener irCodeListener = new LITTLEIRCodeListener();
 					irCodeListener.symbol_table = scopeListener.symbol_table;
 					new ParseTreeWalker().walk(irCodeListener, tree);
