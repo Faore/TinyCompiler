@@ -89,10 +89,8 @@ public class LITTLECompiler {
 					symbol_table.printout();
 
 					LITTLEIRCodeListener irCodeListener = new LITTLEIRCodeListener();
-					irCodeListener.symbol_table = scopeListener.symbol_table;
+					irCodeListener.symbol_table = symbol_table;
 					new ParseTreeWalker().walk(irCodeListener, tree);
-					//Print the Symbol Table
-					scopeListener.print_symbol_tables();
 					System.out.println("\n\nIR Code:");
 					//Print the IROp
 					irCodeListener.printIRCode();
