@@ -10,6 +10,10 @@ VAR_PRINT=0
 #	1 compiles, 0 does not
 VAR_COMPILE=1
 
+# to delete class files, or not to
+#	1 deletes, 0 does not
+VAR_DELETE=1
+
 if [ $VAR_PRINT -eq 1 ]
 then
 	echo ""
@@ -44,6 +48,16 @@ fi
 
 # run the main file LITTLECompiler passing in a file path
 java -cp .:antlr-4.6-complete.jar LITTLECompiler $1
+
+if [ $VAR_DELETE -eq 1 ]
+then
+	if [ $VAR_PRINT -eq 1 ]
+	then
+		echo ""
+		echo "Deleting Class Files"
+	fi
+	rm *.class
+fi
 
 if [ $VAR_PRINT -eq 1 ]
 then

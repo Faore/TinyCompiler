@@ -53,6 +53,10 @@ public class SymbolTable {
 		return this.current_symbol_table.get(name);
 	}
 
+	public SingleSymbolTable<SymbolTableEntry> get_scope(String name) {
+		return this.symbol_table.get(name);
+	}
+
 	public void error(String message) {
 		this.error_messages.add(message);
 		this.did_error = true;
