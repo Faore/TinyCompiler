@@ -11,7 +11,7 @@ import java.util.Stack;
  */
 public class LITTLEIRCodeListener extends LITTLEBaseListener {
     //Symbol Table is useful.
-    LinkedHashMap<String, LinkedHashMap<String, String>> symbol_table;
+    protected SymbolTable symbol_table;
 
     //Store all the IROp
     LinkedList<IRNode> irCode = new LinkedList<IRNode>();
@@ -137,11 +137,11 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         //Assign the result with the last temporary
         String id = ctx.id().getText();
 
-        if(symbol_table.get("GLOBAL").get(id).equals("INT")) {
+        if(symbol_table.get_scope("GLOBAL").get(id).type.equals("INT")) {
             irCode.add(
                     IRNode.store(IROp.STOREI, ("$T" + (nextTemp - 1)), id)
             );
-        } else if(symbol_table.get("GLOBAL").get(id).equals("FLOAT")) {
+        } else if(symbol_table.get_scope("GLOBAL").get(id).type.equals("FLOAT")) {
             irCode.add(
                     IRNode.store(IROp.STOREF, ("$T" + (nextTemp - 1)), id)
             );
@@ -159,20 +159,20 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
     @Override public void enterWrite_stmt(LITTLEParser.Write_stmtContext ctx) {
         //Deal with the first item.
         String firstId = ctx.id_list().id().getText();
-        if(symbol_table.get("GLOBAL").get(firstId).equals("INT")) {
+        if(symbol_table.get_scope("GLOBAL").get(firstId).type.equals("INT")) {
             //Write an integer
             irCode.add(
                     IRNode.ioAndJump(IROp.WRITEI, firstId)
             );
 
         }
-        if(symbol_table.get("GLOBAL").get(firstId).equals("FLOAT")) {
+        if(symbol_table.get_scope("GLOBAL").get(firstId).type.equals("FLOAT")) {
             //Write a float
             irCode.add(
                     IRNode.ioAndJump(IROp.WRITEF, firstId)
             );
         }
-        if(symbol_table.get("GLOBAL").get(firstId).startsWith("STRING")) {
+        if(symbol_table.get_scope("GLOBAL").get(firstId).type.equals("STRING")) {
             //Write a string
             irCode.add(
                     IRNode.ioAndJump(IROp.WRITES, firstId)
@@ -182,20 +182,20 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         LITTLEParser.Id_tailContext currentContext = ctx.id_list().id_tail();
         while(currentContext.id() != null) {
             String id = currentContext.id().getText();
-            if(symbol_table.get("GLOBAL").get(id).equals("INT")) {
+            if(symbol_table.get_scope("GLOBAL").get(id).type.equals("INT")) {
                 //Write an integer
                 irCode.add(
                         IRNode.ioAndJump(IROp.WRITEI, id)
                 );
             }
-            if(symbol_table.get("GLOBAL").get(id).equals("FLOAT")) {
+            if(symbol_table.get_scope("GLOBAL").get(id).type.equals("FLOAT")) {
                 //Write a float
                 irCode.add(
                         IRNode.ioAndJump(IROp.WRITEF, id)
                 );
 
             }
-            if(symbol_table.get("GLOBAL").get(id).startsWith("STRING")) {
+            if(symbol_table.get_scope("GLOBAL").get(id).type.equals("STRING")) {
                 //Write a string
                 irCode.add(
                         IRNode.ioAndJump(IROp.WRITES, id)
