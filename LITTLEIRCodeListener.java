@@ -470,7 +470,7 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         if (ctx.FLOATLITERAL() != null) {
             //Storing a float
             irCode.add(
-                    IRNode.store(IROp.STOREI, ctx.FLOATLITERAL().getText(), "$T" + nextTemp, StoreType.FLOAT)
+                    IRNode.store(IROp.STOREF, ctx.FLOATLITERAL().getText(), "$T" + nextTemp, StoreType.FLOAT)
             );
             //Because we used up a temp, increment it.
             nextTemp++;
