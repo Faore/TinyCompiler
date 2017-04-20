@@ -10,12 +10,15 @@ public class IRNode {
 
     String comment;
 
-    private IRNode(IROp IROp, String op1, String op2, String result) {
+    StoreType type;
+
+    private IRNode(IROp IROp, String op1, String op2, String result, StoreType type) {
         this.IROp = IROp;
         this.op1 = op1;
         this.op2 = op2;
         this.result = result;
         this.comment = null;
+        this.type = type;
     }
 
     private IRNode(String comment) {
@@ -34,18 +37,26 @@ public class IRNode {
         this.result = null;
     }
 
-    public static IRNode op(IROp IROp, String op1, String op2, String result) {
-        return new IRNode(IROp, op1, op2, result);
+    public static IRNode op(IROp IROp, String op1, String op2, String result, StoreType type) {
+        if(result.startsWith("$T")) {
+            //We're storing a temporary.
+            LITTLEIRCodeListener.instance.TempTypes.put(result, type);
+        }
+        return new IRNode(IROp, op1, op2, result, type);
     }
 
     //For jump, label, reads and writes
     public static IRNode ioAndJump(IROp IROp, String result) {
-        return new IRNode(IROp, null, null, result);
+        return new IRNode(IROp, null, null, result, null);
     }
 
     //For stores
-    public static IRNode store(IROp IROp, String op1, String result) {
-        return new IRNode(IROp, op1, null, result);
+    public static IRNode store(IROp IROp, String op1, String result, StoreType type) {
+        if(result.startsWith("$T")) {
+            //We're storing a temporary.
+            LITTLEIRCodeListener.instance.TempTypes.put(result, type);
+        }
+        return new IRNode(IROp, op1, null, result, type);
     }
 
     //Comments
