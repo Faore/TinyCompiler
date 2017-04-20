@@ -95,6 +95,9 @@ public class LITTLECompiler {
                     System.out.println(";IR Code:");
                     //Print the IROp
                     irCodeListener.printIRCode();
+
+                    LITTLETinyCode finalCode = new LITTLETinyCode(irCodeListener.getIRCode());
+                    finalCode.printFinalCode();
                     //Dump the IRCode references for debugging.
                     //for(String ref : irCodeListener.expressionReferences) {
                     //    System.err.println(ref);

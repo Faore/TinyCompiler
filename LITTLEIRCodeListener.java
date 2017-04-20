@@ -268,6 +268,10 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         //Primaries with expressions should parse themselves. I hope.
     }
 
+    public LinkedList<IRNode> getIRCode() {
+        return this.irCode;
+    }
+
     public void printIRCode() {
         for (IRNode node : irCode) {
             node.print();
