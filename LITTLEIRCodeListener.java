@@ -112,7 +112,6 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         } else {
             System.err.println("Failed to generate code for expression: " + ctx.getText());
         }
-
     }
 
     @Override
@@ -278,11 +277,7 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
     @Override
     public void exitPrimary(LITTLEParser.PrimaryContext ctx) {
         if (ctx.id() != null) {
-            if (symbol_table.get_scope("GLOBAL").get(ctx.id().getText()).type.equals("INT")) {
-                //Don't need to store a variable into a temporary when using it as a primary,
-                //just add a reference to it.
-                expressionReferences.add(ctx.id().getText());
-            }
+            expressionReferences.add(ctx.id().getText());
         }
         if (ctx.INTLITERAL() != null) {
             expressionReferences.add(ctx.INTLITERAL().getText());
