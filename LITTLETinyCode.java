@@ -1,13 +1,25 @@
 import java.util.*;
 
 public class LITTLETinyCode {
+	private SymbolTable symbolTable;
 	private LinkedList<IRNode> ir;
 
-	public LITTLETinyCode(LinkedList<IRNode> ir) {
+	public LITTLETinyCode(SymbolTable symbolTable, LinkedList<IRNode> ir) {
+		this.symbolTable = symbolTable;
 		this.ir = ir;
 	}
 
 	public void printFinalCode() {
+		SingleSymbolTable<SymbolTableEntry> global_table = symbolTable.get_scope("GLOBAL");
+		ArrayList<String> variables = global_table.getKeys();
+		for (String var : variables) {
+			SymbolTableEntry entry = global_table.get(var);
+			if (entry.type.equals(SymbolTableEntry.TYPE_STRING)) {
+				System.out.println("str " + var + " " + entry.value);
+			} else {
+				System.out.println("var " + var);
+			}
+		}
 		Iterator<IRNode> iterator = ir.iterator();
 		while (iterator.hasNext()) {
 			System.out.println(irToFinalCode(iterator.next()));
@@ -54,7 +66,6 @@ public class LITTLETinyCode {
 			case WRITEF:
 				return "sys writer " + node.result;
 			case WRITES:
-				// TODO need to define strings and vars in IR, then in this class
 				return "sys writes " + node.result;
 			case JUMP:
 				return "jmp " + node.result;
