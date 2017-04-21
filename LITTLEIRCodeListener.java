@@ -23,9 +23,12 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
     Stack<String> conditionalLabels;
     //Mappings of operators to IRcode jumps.
     HashMap<String, IROp> operatorMappings;
+    //Keep track of while loops. So we can have nested while loops.
+    Stack<String> whileLoops;
 
     int nextTemp = 1;
     int nextIfLabel = 1;
+    int nextWhileLabel = 1;
 
     public static String temp(int i) {
         return "$T" + i;
@@ -41,6 +44,7 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         irCode = new LinkedList<IRNode>();
         TempTypes = new HashMap<String, StoreType>();
         conditionalLabels = new Stack<String>();
+        whileLoops= new Stack<String>();
 
         operatorMappings = new HashMap<>();
         operatorMappings.put("<", IROp.GE);
@@ -342,7 +346,27 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
                 conditionalLabels.push("else" + nextIfLabel);
                 nextIfLabel++;
             }
+        } else {
+            //This condition is part of a while loop.
+            irCode.add(IRNode.cond(operatorMappings.get(ctx.compop().getText()), op1, op2, whileLoops.get(whileLoops.size() - 2)));
         }
+    }
+
+    @Override public void enterWhile_stmt(LITTLEParser.While_stmtContext ctx) {
+        //Insert the label for the while loop conditional testing.
+        irCode.add(IRNode.ioAndJump(IROp.LABEL, "while" + nextWhileLabel));
+        //Add the finish labels to the stack
+        whileLoops.push("endwhile" + nextWhileLabel);
+        whileLoops.push("while" + nextWhileLabel);
+        nextWhileLabel++;
+
+    }
+
+    @Override public void exitWhile_stmt(LITTLEParser.While_stmtContext ctx) {
+        //Jump to the condition and have it checked again.
+        irCode.add(IRNode.ioAndJump(IROp.JUMP, whileLoops.pop()));
+        //Insert label to exit the while loop.
+        irCode.add(IRNode.ioAndJump(IROp.LABEL, whileLoops.pop()));
     }
 
     public LinkedList<IRNode> getIRCode() {
