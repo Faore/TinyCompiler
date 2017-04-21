@@ -1,4 +1,5 @@
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -18,8 +19,13 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
     HashMap<String, StoreType> TempTypes;
     //Expression load list so we can do things like ADDI a b $T1 instead of using temporaries for everything.
     Stack<String> expressionReferences;
+    //Lets Keep Track of if/else statement labels with a stack. This will allow nesting statements and not screwing up ordering.
+    Stack<String> conditionalLabels;
+    //Mappings of operators to IRcode jumps.
+    HashMap<String, IROp> operatorMappings;
 
     int nextTemp = 1;
+    int nextIfLabel = 1;
 
     public static String temp(int i) {
         return "$T" + i;
@@ -34,6 +40,15 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         expressionReferences = new Stack<String>();
         irCode = new LinkedList<IRNode>();
         TempTypes = new HashMap<String, StoreType>();
+        conditionalLabels = new Stack<String>();
+
+        operatorMappings = new HashMap<>();
+        operatorMappings.put("<", IROp.GE);
+        operatorMappings.put(">", IROp.LE);
+        operatorMappings.put("=", IROp.NE);
+        operatorMappings.put("!=", IROp.EQ);
+        operatorMappings.put("<=", IROp.GT);
+        operatorMappings.put(">=", IROp.LT);
 
         for (String key : symbol_table.get_scope("GLOBAL").getKeys()) {
             if(symbol_table.get_scope("GLOBAL").get(key).type.equals("INT")) {
@@ -266,6 +281,68 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
             expressionReferences.add(ctx.FLOATLITERAL().getText());
         }
         //Primaries with expressions should parse themselves. I hope.
+    }
+
+    @Override public void enterIf_stmt(LITTLEParser.If_stmtContext ctx) {
+    }
+
+    @Override public void exitIf_stmt(LITTLEParser.If_stmtContext ctx) {
+        //We need to append the label for the exit of the if statement.
+        irCode.add(IRNode.ioAndJump(IROp.LABEL, conditionalLabels.pop()));
+    }
+
+    @Override public void enterElse_part(LITTLEParser.Else_partContext ctx) {
+        if(ctx == null || ctx.getText().isEmpty()) {
+            //Don't need to do anything if there is no if statement.
+            return;
+        }
+        //The if statement just above will need a jump to skip over this statement.
+        irCode.add(IRNode.ioAndJump(IROp.JUMP, conditionalLabels.get(conditionalLabels.size() - 2)));
+        //We need to append the label for the entering of the else statement.
+        irCode.add(IRNode.ioAndJump(IROp.LABEL, conditionalLabels.pop()));
+    }
+
+    @Override public void exitElse_part(LITTLEParser.Else_partContext ctx) { }
+
+    @Override public void enterCond(LITTLEParser.CondContext ctx) { }
+
+    @Override public void exitCond(LITTLEParser.CondContext ctx) {
+        //Need to create the code to check where to jump
+        //The conditional is made up of an expression, condition operator, and a second expression.
+        //Because the expressions parse themselves, their results will be in the last 2 temporaries on the expression stack.
+        String op2 = expressionReferences.pop();
+        String op1 = expressionReferences.pop();
+
+        ParserRuleContext parent = ctx.getParent();
+        boolean parentIsIfStatement = false;
+        try {
+            ((LITTLEParser.If_stmtContext) parent).IF().getText();
+            parentIsIfStatement = true;
+        } catch (Exception e) {
+            System.err.println("Couldn't cast to IF statement. This is probably a while loop condition, which has yet to be implemented.");
+        }
+
+        //The condition is tricky. We want to jump on the opposite case (ie. i < 5 -> ge i 5 elseLabel)
+        //To make this less of a if-else or case spaghetti, each operator will be mapped to an operator in a hashmap.
+        //Add the operation to the list. In the interest of making labels easy to read, we need to consult out parent if statement.
+        if(parentIsIfStatement) {
+            if(((LITTLEParser.If_stmtContext) ctx.getParent()).else_part() == null || ((LITTLEParser.If_stmtContext) ctx.getParent()).else_part().getText().isEmpty()) {
+                //This is just an if statement
+                //Create operation.
+                irCode.add(IRNode.cond(operatorMappings.get(ctx.compop().getText()), op1, op2, "ifFinish" + nextIfLabel));
+                //Store the label that needs to exist later.
+                conditionalLabels.push("ifFinish" + nextIfLabel);
+                nextIfLabel++;
+            } else {
+                //This is an if statement with an attached else statement.
+                //Create operation.
+                irCode.add(IRNode.cond(operatorMappings.get(ctx.compop().getText()), op1, op2, "else" + nextIfLabel));
+                //Store the label that needs to exist later.
+                conditionalLabels.push("ifFinish" + nextIfLabel);
+                conditionalLabels.push("else" + nextIfLabel);
+                nextIfLabel++;
+            }
+        }
     }
 
     public LinkedList<IRNode> getIRCode() {

@@ -59,6 +59,11 @@ public class IRNode {
         return new IRNode(IROp, op1, null, result, type);
     }
 
+    //For conditional jumps (GT,GE,LT,LE,NE,EQ)
+    public static IRNode cond(IROp IROp, String op1, String op2, String result) {
+        return new IRNode(IROp, op1, op2, result, null);
+    }
+
     //Comments
     public static IRNode comment(String comment) {
         return new IRNode(comment);
