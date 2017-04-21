@@ -33,7 +33,7 @@ public class LITTLEScopeListener extends LITTLEBaseListener {
 			String value = ctx.getChild(3).getText();
 			// store string in current scope
 			if (!this.symbol_table.exists(name)) {
-				this.symbol_table.add(name, new SymbolTableEntry(type + " value " + value));
+				this.symbol_table.add(name, new SymbolTableEntry(type, value));
 			} else {
 				this.symbol_table.error("DECLARATION ERROR " + name);
 			}
