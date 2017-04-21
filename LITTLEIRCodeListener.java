@@ -47,12 +47,18 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         whileLoops= new Stack<String>();
 
         operatorMappings = new HashMap<>();
-        operatorMappings.put("<", IROp.GE);
-        operatorMappings.put(">", IROp.LE);
-        operatorMappings.put("=", IROp.NE);
-        operatorMappings.put("!=", IROp.EQ);
-        operatorMappings.put("<=", IROp.GT);
-        operatorMappings.put(">=", IROp.LT);
+        operatorMappings.put("i<", IROp.GEI);
+        operatorMappings.put("i>", IROp.LEI);
+        operatorMappings.put("i=", IROp.NEI);
+        operatorMappings.put("i!=", IROp.EQI);
+        operatorMappings.put("i<=", IROp.GTI);
+        operatorMappings.put("i>=", IROp.LTI);
+        operatorMappings.put("f<", IROp.GEF);
+        operatorMappings.put("f>", IROp.LEF);
+        operatorMappings.put("f=", IROp.NEF);
+        operatorMappings.put("f!=", IROp.EQF);
+        operatorMappings.put("f<=", IROp.GTF);
+        operatorMappings.put("f>=", IROp.LTF);
 
         for (String key : symbol_table.get_scope("GLOBAL").getKeys()) {
             if(symbol_table.get_scope("GLOBAL").get(key).type.equals("INT")) {
@@ -323,7 +329,11 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
             ((LITTLEParser.If_stmtContext) parent).IF().getText();
             parentIsIfStatement = true;
         } catch (Exception e) {
-            System.err.println("Couldn't cast to IF statement. This is probably a while loop condition, which has yet to be implemented.");
+            try {
+                ((LITTLEParser.While_stmtContext) parent).WHILE().getText();
+            } catch (Exception e2) {
+                System.err.println("Failed to parse condition as part of a while loop or if statement.");
+            }
         }
 
         //The condition is tricky. We want to jump on the opposite case (ie. i < 5 -> ge i 5 elseLabel)
@@ -333,14 +343,14 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
             if(((LITTLEParser.If_stmtContext) ctx.getParent()).else_part() == null || ((LITTLEParser.If_stmtContext) ctx.getParent()).else_part().getText().isEmpty()) {
                 //This is just an if statement
                 //Create operation.
-                irCode.add(IRNode.cond(operatorMappings.get(ctx.compop().getText()), op1, op2, "ifFinish" + nextIfLabel));
+                irCode.add(IRNode.cond(getConditionalOp(ctx.compop(), op1, op2), op1, op2, "ifFinish" + nextIfLabel));
                 //Store the label that needs to exist later.
                 conditionalLabels.push("ifFinish" + nextIfLabel);
                 nextIfLabel++;
             } else {
                 //This is an if statement with an attached else statement.
                 //Create operation.
-                irCode.add(IRNode.cond(operatorMappings.get(ctx.compop().getText()), op1, op2, "else" + nextIfLabel));
+                irCode.add(IRNode.cond(getConditionalOp(ctx.compop(), op1, op2), op1, op2, "else" + nextIfLabel));
                 //Store the label that needs to exist later.
                 conditionalLabels.push("ifFinish" + nextIfLabel);
                 conditionalLabels.push("else" + nextIfLabel);
@@ -348,7 +358,7 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
             }
         } else {
             //This condition is part of a while loop.
-            irCode.add(IRNode.cond(operatorMappings.get(ctx.compop().getText()), op1, op2, whileLoops.get(whileLoops.size() - 2)));
+            irCode.add(IRNode.cond(getConditionalOp(ctx.compop(), op1, op2), op1, op2, whileLoops.get(whileLoops.size() - 2)));
         }
     }
 
@@ -376,6 +386,16 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
     public void printIRCode() {
         for (IRNode node : irCode) {
             node.print();
+        }
+    }
+
+    public IROp getConditionalOp(LITTLEParser.CompopContext ctx, String op1, String op2) {
+        if(getType(op1) == StoreType.INT && getType(op2) == StoreType.INT) {
+            //Working with integers
+            return operatorMappings.get("i" + ctx.getText());
+        } else {
+            //Working with floats
+            return operatorMappings.get("f" + ctx.getText());
         }
     }
 }
