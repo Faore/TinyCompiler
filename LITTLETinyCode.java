@@ -1,16 +1,31 @@
 import java.util.*;
 
 public class LITTLETinyCode {
+	private SymbolTable symbolTable;
 	private LinkedList<IRNode> ir;
 
-	public LITTLETinyCode(LinkedList<IRNode> ir) {
+	public LITTLETinyCode(SymbolTable symbolTable, LinkedList<IRNode> ir) {
+		this.symbolTable = symbolTable;
 		this.ir = ir;
 	}
 
 	public void printFinalCode() {
+		SingleSymbolTable<SymbolTableEntry> global_table = symbolTable.get_scope("GLOBAL");
+		ArrayList<String> variables = global_table.getKeys();
+		for (String var : variables) {
+			SymbolTableEntry entry = global_table.get(var);
+			if (entry.type.equals(SymbolTableEntry.TYPE_STRING)) {
+				System.out.println("str " + var + " " + entry.value);
+			} else {
+				System.out.println("var " + var);
+			}
+		}
 		Iterator<IRNode> iterator = ir.iterator();
 		while (iterator.hasNext()) {
-			System.out.println(irToFinalCode(iterator.next()));
+			String code = irToFinalCode(iterator.next());
+			if (code.length() > 0) {
+				System.out.println(code);
+			}
 		}
 	}
 
@@ -54,32 +69,36 @@ public class LITTLETinyCode {
 			case WRITEF:
 				return "sys writer " + node.result;
 			case WRITES:
-				// TODO need to define strings and vars in IR, then in this class
 				return "sys writes " + node.result;
 			case JUMP:
 				return "jmp " + node.result;
 			case LABEL:
 				return "label " + node.result;
 			case LINK:
-				return "link 1"; // TODO
+				return "";
 			case RET:
 				return "sys halt\nend";
-			/*case IROp.STOREI:
-				return "";
-			case IROp.STOREI:
-				return "";
-			case IROp.STOREI:
-				return "";
-			case IROp.STOREI:
-				return "";
-			case IROp.STOREI:
-				return ""
-			case IROp.STOREI:
-				return ""
-			case IROp.STOREI:
-				return "";*/
+			case GT:
+				return "cmpi " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
+					"jgt " + node.result;
+			case GE:
+				return "cmpi " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
+					"jge " + node.result;
+			case LT:
+				return "cmpi " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
+					"jlt " + node.result;
+			case LE:
+				return "cmpi " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
+					"jle " + node.result;
+			case NE:
+				return "cmpi " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
+					"jne " + node.result;
+			case EQ:
+				return "cmpi " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
+					"jeq " + node.result;
+			default:
+				return "; TODO TODO TODO TODO TODO TODO TODO TODO " + node.op1 + " " + node.result;
 		}
-		return "";
 	}
 
 	private String op_to_register_or_mem(String op) {
