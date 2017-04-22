@@ -96,18 +96,35 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
     @Override
     public void exitAssign_expr(LITTLEParser.Assign_exprContext ctx) {
         //Assign the result with the last temporary
+        String op = expressionReferences.peek();
         String id = ctx.id().getText();
 
-        if (symbol_table.get_scope("GLOBAL").get(id).type.equals("INT")) {
-            irCode.add(
-                    IRNode.store(IROp.STOREI, expressionReferences.peek(), id, StoreType.INT)
-            );
-        } else if (symbol_table.get_scope("GLOBAL").get(id).type.equals("FLOAT")) {
-            irCode.add(
-                    IRNode.store(IROp.STOREF, expressionReferences.peek(), id, StoreType.FLOAT)
-            );
+        if(id.startsWith("$") && op.startsWith("$")) {
+            //Both of these are registers.
+            System.err.println("Attempted to store a temporary to a temporary. This shouldn't happen.");
+        } else if(Character.isAlphabetic(id.charAt(0)) && Character.isAlphabetic(op.charAt(0))) {
+            //Move op into temporary.
+            if(getType(op) == StoreType.INT) {
+                irCode.add(IRNode.store(IROp.STOREI, op, temp(nextTemp), StoreType.INT));
+            } else {
+                irCode.add(IRNode.store(IROp.STOREF, op, temp(nextTemp), StoreType.FLOAT));
+            }
+            //Move the temporary into id.
+            if(getType(id) == StoreType.INT) {
+                irCode.add(IRNode.store(IROp.STOREI, temp(nextTemp), id, StoreType.INT));
+            } else {
+                irCode.add(IRNode.store(IROp.STOREF, temp(nextTemp), id, StoreType.FLOAT));
+            }
+            nextTemp++;
+            return;
+        }
+
+        if (getType(id) == StoreType.INT) {
+            irCode.add(IRNode.store(IROp.STOREI, op, id, StoreType.INT));
         } else {
-            System.err.println("Failed to generate code for expression: " + ctx.getText());
+            irCode.add(
+                    IRNode.store(IROp.STOREF, op, id, StoreType.FLOAT)
+            );
         }
     }
 
