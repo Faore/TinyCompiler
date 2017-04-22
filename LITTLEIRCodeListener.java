@@ -65,7 +65,7 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
                 TempTypes.put(key, StoreType.INT);
             }
             else if(symbol_table.get_scope("GLOBAL").get(key).type.equals("FLOAT")) {
-                TempTypes.put(key, StoreType.INT);
+                TempTypes.put(key, StoreType.FLOAT);
             }
             else if(symbol_table.get_scope("GLOBAL").get(key).type.contains("STRING")) {
                 TempTypes.put(key, StoreType.INT);
