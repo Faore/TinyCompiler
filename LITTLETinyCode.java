@@ -114,7 +114,7 @@ public class LITTLETinyCode {
 			case EQF:
 				return "cmpf " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
 						"jeq " + node.result;
-			default:
+			default: // TODO remove this from production
 				return "; TODO TODO TODO TODO TODO TODO TODO TODO " + node.op1 + " " + node.result;
 		}
 	}
