@@ -180,6 +180,57 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
     }
 
     @Override
+    public void exitRead_stmt(LITTLEParser.Read_stmtContext ctx) {
+        //Deal with the first item.
+        String firstId = ctx.id_list().id().getText();
+        if (symbol_table.get_scope("GLOBAL").get(firstId).type.equals("INT")) {
+            //Write an integer
+            irCode.add(
+                    IRNode.ioAndJump(IROp.READI, firstId)
+            );
+
+        }
+        if (symbol_table.get_scope("GLOBAL").get(firstId).type.equals("FLOAT")) {
+            //Write a float
+            irCode.add(
+                    IRNode.ioAndJump(IROp.READF, firstId)
+            );
+        }
+        /*if (symbol_table.get_scope("GLOBAL").get(firstId).type.equals("STRING")) {
+            //Write a string
+            irCode.add(
+                    IRNode.ioAndJump(IROp.READS, firstId)
+            );
+        }*/
+        LITTLEParser.Id_tailContext currentContext = ctx.id_list().id_tail();
+        while (currentContext.id() != null) {
+            String id = currentContext.id().getText();
+            if (symbol_table.get_scope("GLOBAL").get(id).type.equals("INT")) {
+                //Write an integer
+                irCode.add(
+                        IRNode.ioAndJump(IROp.READI, id)
+                );
+            } else if (symbol_table.get_scope("GLOBAL").get(id).type.equals("FLOAT")) {
+                //Write a float
+                irCode.add(
+                        IRNode.ioAndJump(IROp.READF, id)
+                );
+
+            } /*else if (symbol_table.get_scope("GLOBAL").get(id).type.contains("STRING")) {
+                //Write a string
+                irCode.add(
+                        IRNode.ioAndJump(IROp.READS, id)
+                );
+
+            }*/ else {
+                System.err.println("Encountered unrecognized type to READ.");
+            }
+            //Change the context.
+            currentContext = currentContext.id_tail();
+        }
+    }
+
+    @Override
     public void exitExpr(LITTLEParser.ExprContext ctx) {
         handleExpressionPrefix(ctx.expr_prefix());
     }
