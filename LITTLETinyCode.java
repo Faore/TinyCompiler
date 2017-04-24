@@ -78,24 +78,42 @@ public class LITTLETinyCode {
 				return "";
 			case RET:
 				return "sys halt\nend";
-			case GT:
+			case GTI:
 				return "cmpi " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
 					"jgt " + node.result;
-			case GE:
+			case GEI:
 				return "cmpi " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
 					"jge " + node.result;
-			case LT:
+			case LTI:
 				return "cmpi " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
 					"jlt " + node.result;
-			case LE:
+			case LEI:
 				return "cmpi " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
 					"jle " + node.result;
-			case NE:
+			case NEI:
 				return "cmpi " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
 					"jne " + node.result;
-			case EQ:
+			case EQI:
 				return "cmpi " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
 					"jeq " + node.result;
+			case GTF:
+				return "cmpf " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
+						"jgt " + node.result;
+			case GEF:
+				return "cmpf " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
+						"jge " + node.result;
+			case LTF:
+				return "cmpf " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
+						"jlt " + node.result;
+			case LEF:
+				return "cmpf " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
+						"jle " + node.result;
+			case NEF:
+				return "cmpf " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
+						"jne " + node.result;
+			case EQF:
+				return "cmpf " + op_to_register_or_mem(node.op1) + " " + op_to_register_or_mem(node.op2) + "\n" +
+						"jeq " + node.result;
 			default: // TODO remove this from production
 				return "; TODO TODO TODO TODO TODO TODO TODO TODO " + node.op1 + " " + node.result;
 		}
