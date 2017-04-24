@@ -44,7 +44,7 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         irCode = new LinkedList<IRNode>();
         TempTypes = new HashMap<String, StoreType>();
         conditionalLabels = new Stack<String>();
-        whileLoops= new Stack<String>();
+        whileLoops = new Stack<String>();
 
         operatorMappings = new HashMap<>();
         operatorMappings.put("i<", IROp.GEI);
@@ -61,16 +61,13 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         operatorMappings.put("f>=", IROp.LTF);
 
         for (String key : symbol_table.get_scope("GLOBAL").getKeys()) {
-            if(symbol_table.get_scope("GLOBAL").get(key).type.equals("INT")) {
+            if (symbol_table.get_scope("GLOBAL").get(key).type.equals("INT")) {
                 TempTypes.put(key, StoreType.INT);
-            }
-            else if(symbol_table.get_scope("GLOBAL").get(key).type.equals("FLOAT")) {
+            } else if (symbol_table.get_scope("GLOBAL").get(key).type.equals("FLOAT")) {
+                TempTypes.put(key, StoreType.FLOAT);
+            } else if (symbol_table.get_scope("GLOBAL").get(key).type.contains("STRING")) {
                 TempTypes.put(key, StoreType.INT);
-            }
-            else if(symbol_table.get_scope("GLOBAL").get(key).type.contains("STRING")) {
-                TempTypes.put(key, StoreType.INT);
-            }
-            else {
+            } else {
                 System.err.println("Failed to add variable key " + key + "to TempTypes.");
             }
         }
@@ -99,20 +96,36 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
     @Override
     public void exitAssign_expr(LITTLEParser.Assign_exprContext ctx) {
         //Assign the result with the last temporary
+        String op = expressionReferences.peek();
         String id = ctx.id().getText();
 
-        if (symbol_table.get_scope("GLOBAL").get(id).type.equals("INT")) {
-            irCode.add(
-                    IRNode.store(IROp.STOREI, expressionReferences.peek(), id, StoreType.INT)
-            );
-        } else if (symbol_table.get_scope("GLOBAL").get(id).type.equals("FLOAT")) {
-            irCode.add(
-                    IRNode.store(IROp.STOREF, expressionReferences.peek(), id, StoreType.FLOAT)
-            );
-        } else {
-            System.err.println("Failed to generate code for expression: " + ctx.getText());
+        if(id.startsWith("$") && op.startsWith("$")) {
+            //Both of these are registers.
+            System.err.println("Attempted to store a temporary to a temporary. This shouldn't happen.");
+        } else if(Character.isAlphabetic(id.charAt(0)) && Character.isAlphabetic(op.charAt(0))) {
+            //Move op into temporary.
+            if(getType(op) == StoreType.INT) {
+                irCode.add(IRNode.store(IROp.STOREI, op, temp(nextTemp), StoreType.INT));
+            } else {
+                irCode.add(IRNode.store(IROp.STOREF, op, temp(nextTemp), StoreType.FLOAT));
+            }
+            //Move the temporary into id.
+            if(getType(id) == StoreType.INT) {
+                irCode.add(IRNode.store(IROp.STOREI, temp(nextTemp), id, StoreType.INT));
+            } else {
+                irCode.add(IRNode.store(IROp.STOREF, temp(nextTemp), id, StoreType.FLOAT));
+            }
+            nextTemp++;
+            return;
         }
 
+        if (getType(id) == StoreType.INT) {
+            irCode.add(IRNode.store(IROp.STOREI, op, id, StoreType.INT));
+        } else {
+            irCode.add(
+                    IRNode.store(IROp.STOREF, op, id, StoreType.FLOAT)
+            );
+        }
     }
 
     @Override
@@ -188,11 +201,11 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
 
     private void handleExpressionPrefix(LITTLEParser.Expr_prefixContext expr_prefix) {
         //Check if the child expression prefix exists, if so, perform its operation.
-        if(expr_prefix != null && !expr_prefix.getText().isEmpty()) {
+        if (expr_prefix != null && !expr_prefix.getText().isEmpty()) {
             //The result of the expression prefix should be stored 2 below (since factors can only be primaries)
-            if(expr_prefix.addop().getText().equals("+")) {
+            if (expr_prefix.addop().getText().equals("+")) {
                 //If doing math on int and int, store as int, otherwise store float.
-                if(getType(expressionReferences.get(expressionReferences.size() - 2)) == StoreType.INT && getType(expressionReferences.peek()) == StoreType.INT) {
+                if (getType(expressionReferences.get(expressionReferences.size() - 2)) == StoreType.INT && getType(expressionReferences.peek()) == StoreType.INT) {
                     irCode.add(
                             IRNode.op(IROp.ADDI, expressionReferences.get(expressionReferences.size() - 2), expressionReferences.peek(), temp(nextTemp), StoreType.INT)
                     );
@@ -207,7 +220,7 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
                 nextTemp++;
             } else {
                 //If doing math on int and int, store as int, otherwise store float.
-                if(getType(expressionReferences.get(expressionReferences.size() - 2)) == StoreType.INT && getType(expressionReferences.peek()) == StoreType.INT) {
+                if (getType(expressionReferences.get(expressionReferences.size() - 2)) == StoreType.INT && getType(expressionReferences.peek()) == StoreType.INT) {
                     irCode.add(
                             IRNode.op(IROp.SUBI, expressionReferences.get(expressionReferences.size() - 2), expressionReferences.peek(), temp(nextTemp), StoreType.INT)
                     );
@@ -226,11 +239,11 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
 
     private void handleFactorPrefix(LITTLEParser.Factor_prefixContext factor_prefix) {
         //Check if the child expression prefix exists, if so, perform its operation.
-        if(factor_prefix != null && !factor_prefix.getText().isEmpty()) {
+        if (factor_prefix != null && !factor_prefix.getText().isEmpty()) {
             //The result of the expression prefix should be stored 2 below (since factors can only be primaries)
-            if(factor_prefix.mulop().getText().equals("*")) {
+            if (factor_prefix.mulop().getText().equals("*")) {
                 //If doing math on int and int or int and float, store as int, otherwise store float.
-                if(getType(expressionReferences.get(expressionReferences.size() - 2)) == StoreType.INT || getType(expressionReferences.peek()) == StoreType.INT) {
+                if (getType(expressionReferences.get(expressionReferences.size() - 2)) == StoreType.INT || getType(expressionReferences.peek()) == StoreType.INT) {
                     irCode.add(
                             IRNode.op(IROp.MULTI, expressionReferences.get(expressionReferences.size() - 2), expressionReferences.peek(), temp(nextTemp), StoreType.INT)
                     );
@@ -245,7 +258,7 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
                 nextTemp++;
             } else {
                 //If doing math on int and int, store as int, otherwise store float.
-                if(getType(expressionReferences.get(expressionReferences.size() - 2)) == StoreType.INT && getType(expressionReferences.peek()) == StoreType.INT) {
+                if (getType(expressionReferences.get(expressionReferences.size() - 2)) == StoreType.INT && getType(expressionReferences.peek()) == StoreType.INT) {
                     irCode.add(
                             IRNode.op(IROp.DIVI, expressionReferences.get(expressionReferences.size() - 2), expressionReferences.peek(), temp(nextTemp), StoreType.INT)
                     );
@@ -263,9 +276,9 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
     }
 
     private StoreType getType(String ref) {
-        if(Character.isDigit(ref.charAt(0))) {
+        if (Character.isDigit(ref.charAt(0))) {
             //This isn't a variable reference, its a direct value.
-            if(ref.contains(".")) {
+            if (ref.contains(".")) {
                 return StoreType.FLOAT;
             } else {
                 return StoreType.INT;
@@ -278,11 +291,7 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
     @Override
     public void exitPrimary(LITTLEParser.PrimaryContext ctx) {
         if (ctx.id() != null) {
-            if (symbol_table.get_scope("GLOBAL").get(ctx.id().getText()).type.equals("INT")) {
-                //Don't need to store a variable into a temporary when using it as a primary,
-                //just add a reference to it.
-                expressionReferences.add(ctx.id().getText());
-            }
+            expressionReferences.add(ctx.id().getText());
         }
         if (ctx.INTLITERAL() != null) {
             expressionReferences.add(ctx.INTLITERAL().getText());
@@ -293,16 +302,19 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         //Primaries with expressions should parse themselves. I hope.
     }
 
-    @Override public void enterIf_stmt(LITTLEParser.If_stmtContext ctx) {
+    @Override
+    public void enterIf_stmt(LITTLEParser.If_stmtContext ctx) {
     }
 
-    @Override public void exitIf_stmt(LITTLEParser.If_stmtContext ctx) {
+    @Override
+    public void exitIf_stmt(LITTLEParser.If_stmtContext ctx) {
         //We need to append the label for the exit of the if statement.
         irCode.add(IRNode.ioAndJump(IROp.LABEL, conditionalLabels.pop()));
     }
 
-    @Override public void enterElse_part(LITTLEParser.Else_partContext ctx) {
-        if(ctx == null || ctx.getText().isEmpty()) {
+    @Override
+    public void enterElse_part(LITTLEParser.Else_partContext ctx) {
+        if (ctx == null || ctx.getText().isEmpty()) {
             //Don't need to do anything if there is no if statement.
             return;
         }
@@ -312,16 +324,31 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         irCode.add(IRNode.ioAndJump(IROp.LABEL, conditionalLabels.pop()));
     }
 
-    @Override public void exitElse_part(LITTLEParser.Else_partContext ctx) { }
+    @Override
+    public void exitElse_part(LITTLEParser.Else_partContext ctx) {
+    }
 
-    @Override public void enterCond(LITTLEParser.CondContext ctx) { }
+    @Override
+    public void enterCond(LITTLEParser.CondContext ctx) {
+    }
 
-    @Override public void exitCond(LITTLEParser.CondContext ctx) {
+    @Override
+    public void exitCond(LITTLEParser.CondContext ctx) {
         //Need to create the code to check where to jump
         //The conditional is made up of an expression, condition operator, and a second expression.
         //Because the expressions parse themselves, their results will be in the last 2 temporaries on the expression stack.
         String op2 = expressionReferences.pop();
         String op1 = expressionReferences.pop();
+
+        //CMPI requires the second operand to be a register. To avoid dirtying up the rest of the assembly, it will be loaded into a temporary here.
+        //This is either an int or a float. Generate a store.
+        if (getType(op2) == StoreType.INT) {
+            irCode.add(IRNode.store(IROp.STOREI, op2, temp(nextTemp), StoreType.INT));
+        } else {
+            irCode.add(IRNode.store(IROp.STOREF, op2, temp(nextTemp), StoreType.FLOAT));
+        }
+        op2 = temp(nextTemp);
+        nextTemp++;
 
         ParserRuleContext parent = ctx.getParent();
         boolean parentIsIfStatement = false;
@@ -339,8 +366,8 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         //The condition is tricky. We want to jump on the opposite case (ie. i < 5 -> ge i 5 elseLabel)
         //To make this less of a if-else or case spaghetti, each operator will be mapped to an operator in a hashmap.
         //Add the operation to the list. In the interest of making labels easy to read, we need to consult out parent if statement.
-        if(parentIsIfStatement) {
-            if(((LITTLEParser.If_stmtContext) ctx.getParent()).else_part() == null || ((LITTLEParser.If_stmtContext) ctx.getParent()).else_part().getText().isEmpty()) {
+        if (parentIsIfStatement) {
+            if (((LITTLEParser.If_stmtContext) ctx.getParent()).else_part() == null || ((LITTLEParser.If_stmtContext) ctx.getParent()).else_part().getText().isEmpty()) {
                 //This is just an if statement
                 //Create operation.
                 irCode.add(IRNode.cond(getConditionalOp(ctx.compop(), op1, op2), op1, op2, "ifFinish" + nextIfLabel));
@@ -362,7 +389,8 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
         }
     }
 
-    @Override public void enterWhile_stmt(LITTLEParser.While_stmtContext ctx) {
+    @Override
+    public void enterWhile_stmt(LITTLEParser.While_stmtContext ctx) {
         //Insert the label for the while loop conditional testing.
         irCode.add(IRNode.ioAndJump(IROp.LABEL, "while" + nextWhileLabel));
         //Add the finish labels to the stack
@@ -372,7 +400,8 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
 
     }
 
-    @Override public void exitWhile_stmt(LITTLEParser.While_stmtContext ctx) {
+    @Override
+    public void exitWhile_stmt(LITTLEParser.While_stmtContext ctx) {
         //Jump to the condition and have it checked again.
         irCode.add(IRNode.ioAndJump(IROp.JUMP, whileLoops.pop()));
         //Insert label to exit the while loop.
@@ -390,7 +419,7 @@ public class LITTLEIRCodeListener extends LITTLEBaseListener {
     }
 
     public IROp getConditionalOp(LITTLEParser.CompopContext ctx, String op1, String op2) {
-        if(getType(op1) == StoreType.INT && getType(op2) == StoreType.INT) {
+        if (getType(op1) == StoreType.INT && getType(op2) == StoreType.INT) {
             //Working with integers
             return operatorMappings.get("i" + ctx.getText());
         } else {
