@@ -80,7 +80,7 @@ for file in $FINAL2
 done
 
 #Run the diff between sets of files. 
-for file in $FINAL1
+for j in $FINAL1
 do
   filename=${j%.*}
   tinyname=${filename##*/}
